@@ -95,7 +95,7 @@ int uart_read(int fd, unsigned char *buffer, int len) {
 }
 
 int main() {
-    int fd = uart_open("/dev/ttyTHS1"); // Adjust as per your UART port
+    int fd = uart_open("/dev/ttyTHS0"); // Adjust as per your UART port
     if (fd < 0) return -1;
 
     const unsigned char command[] = {0x01, 0x52, 0x70, 0x19, 0x00, 0x00, 0x00, 0x00, 0x04}; // Example command
