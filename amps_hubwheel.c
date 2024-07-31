@@ -63,6 +63,8 @@ int uart_open(const char *portname) {
         close(fd);
         return -1;
     }
+
+    printf("UART opened successfully.\n");    
     return fd;
 }
 
@@ -71,15 +73,18 @@ void uart_close(int fd) {
 }
 
 int uart_write(int fd, const unsigned char *data, int len) {
+    printf("Sending command...\n");
     int wlen = write(fd, data, len);
     if (wlen != len) {
         printf("Error from write: %d, %d\n", wlen, errno);
         return -1;
     }
+    printf("Command sent.\n");    
     return 0;
 }
 
 int uart_read(int fd, unsigned char *buffer, int len) {
+    printf("Reading response...\n");
     int rdlen = read(fd, buffer, len);
     if (rdlen > 0) {
         // Output the received data
@@ -90,6 +95,8 @@ int uart_read(int fd, unsigned char *buffer, int len) {
         printf("\n");
     } else if (rdlen < 0) {
         printf("Error from read: %d\n", errno);
+    } else {
+        printf("No data received.\n");
     }
     return rdlen;
 }
@@ -99,10 +106,16 @@ int main() {
     if (fd < 0) return -1;
 
     const unsigned char command[] = {0x01, 0x52, 0x70, 0x19, 0x00, 0x00, 0x00, 0x00, 0x04}; // Example command
-    uart_write(fd, command, sizeof(command)); // Send command
+    if (uart_write(fd, command, sizeof(command)) < 0) {
+        uart_close(fd);
+        return -1;
+    }
 
     unsigned char read_buf[100];
-    uart_read(fd, read_buf, sizeof(read_buf)); // Read response
+    if (uart_read(fd, read_buf, sizeof(read_buf)) <= 0) {
+        uart_close(fd);
+        return -1;
+    }
 
     uart_close(fd);
     return 0;
