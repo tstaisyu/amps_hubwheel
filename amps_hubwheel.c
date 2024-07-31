@@ -111,6 +111,8 @@ int main() {
         return -1;
     }
 
+    sleep(1); // Wait for the response
+
     unsigned char read_buf[100];
     if (uart_read(fd, read_buf, sizeof(read_buf)) <= 0) {
         uart_close(fd);
