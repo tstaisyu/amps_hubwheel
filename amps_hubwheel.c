@@ -47,6 +47,7 @@ uint8_t lowByte(uint16_t value) {
 int uart_open(const char *portname);
 void uart_close(int fd);
 int uart_write(int fd, const unsigned char *data, int len);
+int uart_read(int fd, unsigned char *buffer, int len);
 void sendCommand(int fd, byte motorID, uint16_t address, byte command, uint32_t data);
 void initMotor(int fd, byte motorID);
 
