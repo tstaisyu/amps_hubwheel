@@ -22,6 +22,32 @@
 #include <errno.h>
 #include <termios.h>
 
+#define MOTOR_ID 0x01
+#define OPERATION_MODE_ADDRESS 0x7017
+#define EMERGENCY_STOP_ADDRESS 0x701F
+#define CONTROL_WORD_ADDRESS 0x7019
+#define WRITE_COMMAND 0x51
+#define OPERATION_MODE_SPEED_CONTROL 0x00000003
+#define DISABLE_EMERGENCY_STOP 0x00000000
+#define ENABLE_MOTOR 0x0000000F
+
+int uart_open(const char *portname);
+void uart_close(int fd);
+int uart_write(int fd, const unsigned char *data, int len);
+void sendCommand(int fd, byte motorID, uint16_t address, byte command, uint32_t data);
+void initMotor(int fd, byte motorID);
+
+int main() {
+    int fd = uart_open("/dev/ttyTHS0"); // Adjust as per your UART port
+    if (fd < 0) return -1;
+
+    initMotor(fd, MOTOR_ID);
+
+    uart_close(fd);
+    return 0;
+}
+
+
 int uart_open(const char *portname) {
     int fd;
     struct termios tty;
@@ -126,24 +152,22 @@ int uart_read(int fd, unsigned char *buffer, int len) {
     return 0;
 }
 
-int main() {
-    int fd = uart_open("/dev/ttyTHS0"); // Adjust as per your UART port
-    if (fd < 0) return -1;
 
-    const unsigned char command[] = {0x01, 0x52, 0x70, 0x19, 0x00, 0x00, 0x00, 0x00, 0x04}; // Example command
-    if (uart_write(fd, command, sizeof(command)) < 0) {
-        uart_close(fd);
-        return -1;
+void sendCommand(int fd, byte motorID, uint16_t address, byte command, uint32_t data) {
+    byte packet[] = {motorID, command, highByte(address), lowByte(address), 0, (byte)(data >> 24), (byte)(data >> 16), (byte)(data >> 8), (byte)data};
+    byte checksum = 0;
+    for (int i = 0; i < sizeof(packet); i++) {
+        checksum += packet[i];
     }
+    uart_write(fd, packet, sizeof(packet));
+    uart_write(fd, &checksum, 1);
+}
 
-    sleep(1); // Wait for the response
-
-    unsigned char read_buf[100];
-    if (uart_read(fd, read_buf, sizeof(read_buf)) <= 0) {
-        uart_close(fd);
-        return -1;
-    }
-
-    uart_close(fd);
-    return 0;
+void initMotor(int fd, byte motorID) {
+    sendCommand(fd, motorID, OPERATION_MODE_ADDRESS, WRITE_COMMAND, OPERATION_MODE_SPEED_CONTROL);
+    usleep(100000);  // 100 ms delay
+    sendCommand(fd, motorID, EMERGENCY_STOP_ADDRESS, WRITE_COMMAND, DISABLE_EMERGENCY_STOP);
+    usleep(100000);  // 100 ms delay
+    sendCommand(fd, motorID, CONTROL_WORD_ADDRESS, WRITE_COMMAND, ENABLE_MOTOR);
+    usleep(100000);  // 100 ms delay
 }
