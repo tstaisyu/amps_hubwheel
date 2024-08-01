@@ -35,7 +35,8 @@ uint8_t lowByte(uint16_t value) {
     return (uint8_t)(value & 0xFF);
 }
 
-#define MOTOR_ID 0x01
+#define RIGHT_MOTOR_ID 0x01
+#define LEFT_MOTOR_ID 0x01
 #define OPERATION_MODE_ADDRESS 0x7017
 #define EMERGENCY_STOP_ADDRESS 0x701F
 #define CONTROL_WORD_ADDRESS 0x7019
@@ -101,16 +102,21 @@ void sendSpeedCommand(int fd, byte motorID, uint32_t speed) {
 }
 
 int main() {
-    int fd = uart_open("/dev/ttyTHS0"); // Adjust as per your UART port
-    if (fd < 0) return -1;
+    int uart1_fd = uart_open("/dev/ttyTHS0"); // Adjust as per your UART port
+    int uart2_fd = uart_open("/dev/ttyTHS2");
+    if (uart1_fd < 0 || uart2_fd < 0) {
+        fprintf(stderr, "Failed to open UART ports\n");
+        return EXIT_FAILURE;
+    }
 
-    initMotor(fd, MOTOR_ID);
-    if (checkMotorResponse(fd)) {
+    initMotor(uart1_fd, RIGHT_MOTOR_ID);
+    initMotor(uart2_fd, LEFT_MOTOR_ID);
+    if (checkMotorResponse(uart1_fd)) {
         printf("Motor initialized successfully.\n");
 
         // モータに速度コマンドを送信
-        sendSpeedCommand(fd, MOTOR_ID, 0x00000000);  // 速度値は例です
-        if (checkMotorResponse(fd)) {
+        sendSpeedCommand(uart1_fd, RIGHT_MOTOR_ID, 0x00000000);  // 速度値は例です
+        if (checkMotorResponse(uart1_fd)) {
             printf("Speed command accepted.\n");
         } else {
             printf("Failed to send speed command.\n");
@@ -119,7 +125,22 @@ int main() {
         printf("Failed to initialize motor.\n");
     }
 
-    uart_close(fd);
+    if (checkMotorResponse(uart2_fd)) {
+        printf("Motor initialized successfully.\n");
+
+        // モータに速度コマンドを送信
+        sendSpeedCommand(uart2_fd, LEFT_MOTOR_ID, 0x00000000);  // 速度値は例です
+        if (checkMotorResponse(uart2_fd)) {
+            printf("Speed command accepted.\n");
+        } else {
+            printf("Failed to send speed command.\n");
+        }
+    } else {
+        printf("Failed to initialize motor.\n");
+    }
+
+    uart_close(uart1_fd);
+    uart_close(uart2_fd);
     return 0;
 }
 
