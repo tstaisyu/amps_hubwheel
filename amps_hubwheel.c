@@ -21,6 +21,9 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <termios.h>
+#include <stdint.h>
+
+typedef uint8_t byte;
 
 #define MOTOR_ID 0x01
 #define OPERATION_MODE_ADDRESS 0x7017
