@@ -36,7 +36,7 @@ uint8_t lowByte(uint16_t value) {
 }
 
 #define RIGHT_MOTOR_ID 0x01
-#define LEFT_MOTOR_ID 0x01
+#define LEFT_MOTOR_ID 0x02
 #define OPERATION_MODE_ADDRESS 0x7017
 #define EMERGENCY_STOP_ADDRESS 0x701F
 #define CONTROL_WORD_ADDRESS 0x7019
