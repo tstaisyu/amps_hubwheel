@@ -40,6 +40,7 @@ uint8_t lowByte(uint16_t value) {
 #define EMERGENCY_STOP_ADDRESS 0x701F
 #define CONTROL_WORD_ADDRESS 0x7019
 #define WRITE_COMMAND 0x51
+#define ENABLE_COMMAND 0x52
 #define OPERATION_MODE_SPEED_CONTROL 0x00000003
 #define DISABLE_EMERGENCY_STOP 0x00000000
 #define ENABLE_MOTOR 0x0000000F
@@ -242,7 +243,7 @@ void initMotor(int fd, byte motorID) {
     usleep(100000);  // 100 ms delay
     sendCommand(fd, motorID, EMERGENCY_STOP_ADDRESS, WRITE_COMMAND, DISABLE_EMERGENCY_STOP);
     usleep(100000);  // 100 ms delay
-    sendCommand(fd, motorID, CONTROL_WORD_ADDRESS, WRITE_COMMAND, ENABLE_MOTOR);
+    sendCommand(fd, motorID, CONTROL_WORD_ADDRESS, ENABLE_COMMAND, ENABLE_MOTOR);
     usleep(100000);  // 100 ms delay
 }
 
