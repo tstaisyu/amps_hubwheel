@@ -74,6 +74,13 @@ void uart_close(int fd) {
 
 int uart_write(int fd, const unsigned char *data, int len) {
     printf("Sending command...\n");
+    // データ内容をログに出力
+    printf("Data being sent: ");
+    for (int i = 0; i < len; i++) {
+        printf("%02x ", data[i]);
+    }
+    printf("\n");
+
     int wlen = write(fd, data, len);
     if (wlen != len) {
         printf("Error from write: %d, %d\n", wlen, errno);
@@ -86,7 +93,9 @@ int uart_write(int fd, const unsigned char *data, int len) {
 int uart_read(int fd, unsigned char *buffer, int len) {
     printf("Reading response...\n");
     int rdlen = 0;
-    while (1) {
+    int totalWaitTime = 0;
+
+    while (totalWaitTime < 5000) {
         rdlen = read(fd, buffer, len);
         if (rdlen > 0) {
             // Output the received data
@@ -95,12 +104,13 @@ int uart_read(int fd, unsigned char *buffer, int len) {
                 printf(" %02x", buffer[i]);
             }
             printf("\n");
-            break;
+            return rdlen;
         } else if (rdlen < 0) {
             if (errno == EAGAIN || errno == EWOULDBLOCK) {
                 // ノンブロッキングモードの場合、データがまだない
                 printf("Waiting for data...\n");
                 usleep(100000);  // 0.1秒待機
+                totalWaitTime += 100;
             } else {
                 // シリアスなエラーが発生した
                 printf("Error from read: %d\n", errno);
@@ -109,9 +119,11 @@ int uart_read(int fd, unsigned char *buffer, int len) {
         } else {
             printf("No data received, waiting...\n");
             usleep(100000);  // 0.1秒待機
+            totalWaitTime += 100;
         }
     }
-    return rdlen;
+    printf("Read timeout occurred.\n");
+    return 0;
 }
 
 int main() {
