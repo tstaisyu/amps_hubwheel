@@ -130,7 +130,7 @@ int main() {
         log_print(LOG_INFO, "Motor initialized successfully.");
 
         // モータに速度コマンドを送信
-        sendSpeedCommand(fd, MOTOR_ID, 100000);  // 速度値は例です
+        sendSpeedCommand(fd, MOTOR_ID, 0x00010000);  // 速度値は例です
         if (checkMotorResponse(fd)) {
             log_print(LOG_INFO, "Speed command accepted.");
         } else {
