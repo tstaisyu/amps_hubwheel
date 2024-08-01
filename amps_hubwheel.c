@@ -50,11 +50,49 @@ int uart_write(int fd, const unsigned char *data, int len);
 void sendCommand(int fd, byte motorID, uint16_t address, byte command, uint32_t data);
 void initMotor(int fd, byte motorID);
 
+int checkMotorResponse(int fd) {
+    unsigned char buffer[100];
+    int len = uart_read(fd, buffer, sizeof(buffer));
+    if (len > 0) {
+        // データを解析して期待する応答であるか確認
+        printf("Response received: ");
+        for (int i = 0; i < len; i++) {
+            printf("%02x ", buffer[i]);
+        }
+        printf("\n");
+
+        // ここでバッファの内容に基づいて成功かどうかを判断
+        // 例: if (buffer[0] == EXPECTED_RESPONSE) return 1;
+    } else {
+        printf("No response or error reading response.\n");
+    }
+    return 0;
+}
+
+void sendSpeedCommand(int fd, byte motorID, uint32_t speed) {
+    // 速度コマンドを構築 (アドレスとコマンドは適宜調整)
+    uint16_t speedCommandAddress = 0x70B2;  // 仮のアドレス
+    sendCommand(fd, motorID, speedCommandAddress, WRITE_COMMAND, speed);
+}
+
 int main() {
     int fd = uart_open("/dev/ttyTHS0"); // Adjust as per your UART port
     if (fd < 0) return -1;
 
     initMotor(fd, MOTOR_ID);
+    if (checkMotorResponse(fd)) {
+        printf("Motor initialized successfully.\n");
+
+        // モータに速度コマンドを送信
+        sendSpeedCommand(fd, MOTOR_ID, 1000);  // 速度値は例です
+        if (checkMotorResponse(fd)) {
+            printf("Speed command accepted.\n");
+        } else {
+            printf("Failed to send speed command.\n");
+        }
+    } else {
+        printf("Failed to initialize motor.\n");
+    }
 
     uart_close(fd);
     return 0;
@@ -184,3 +222,4 @@ void initMotor(int fd, byte motorID) {
     sendCommand(fd, motorID, CONTROL_WORD_ADDRESS, WRITE_COMMAND, ENABLE_MOTOR);
     usleep(100000);  // 100 ms delay
 }
+
