@@ -22,6 +22,7 @@
 #include <errno.h>
 #include <termios.h>
 #include <stdint.h>
+#include <stdarg.h>
 
 typedef uint8_t byte;
 
