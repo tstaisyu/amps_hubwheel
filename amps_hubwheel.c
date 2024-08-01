@@ -105,6 +105,7 @@ int main() {
     if (fd < 0) return -1;
 
     initMotor(fd, MOTOR_ID);
+    sleep(1);  // 1秒待機
     if (checkMotorResponse(fd)) {
         printf("Motor initialized successfully.\n");
 
