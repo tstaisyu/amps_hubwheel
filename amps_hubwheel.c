@@ -26,7 +26,7 @@ int uart_open(const char *portname) {
     int fd;
     struct termios tty;
 
-    fd = open(portname, O_RDWR | O_NOCTTY | O_SYNC);
+    fd = open(portname, O_RDWR | O_NOCTTY | O_SYNC | O_NONBLOCK);
     if (fd < 0) {
         printf("Error opening %s: %s\n", portname, strerror(errno));
         return -1;
@@ -85,18 +85,31 @@ int uart_write(int fd, const unsigned char *data, int len) {
 
 int uart_read(int fd, unsigned char *buffer, int len) {
     printf("Reading response...\n");
-    int rdlen = read(fd, buffer, len);
-    if (rdlen > 0) {
-        // Output the received data
-        printf("Read %d bytes\n", rdlen);
-        for (int i = 0; i < rdlen; i++) {
-            printf(" %02x", buffer[i]);
+    int rdlen = 0;
+    while (1) {
+        rdlen = read(fd, buffer, len);
+        if (rdlen > 0) {
+            // Output the received data
+            printf("Read %d bytes\n", rdlen);
+            for (int i = 0; i < rdlen; i++) {
+                printf(" %02x", buffer[i]);
+            }
+            printf("\n");
+            break;
+        } else if (rdlen < 0) {
+            if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                // ノンブロッキングモードの場合、データがまだない
+                printf("Waiting for data...\n");
+                usleep(100000);  // 0.1秒待機
+            } else {
+                // シリアスなエラーが発生した
+                printf("Error from read: %d\n", errno);
+                return -1;  // エラーを返して終了
+            }
+        } else {
+            printf("No data received, waiting...\n");
+            usleep(100000);  // 0.1秒待機
         }
-        printf("\n");
-    } else if (rdlen < 0) {
-        printf("Error from read: %d\n", errno);
-    } else {
-        printf("No data received.\n");
     }
     return rdlen;
 }
