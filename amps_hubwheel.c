@@ -51,7 +51,7 @@ uint8_t lowByte(uint16_t value) {
 #define LOG_INFO 1
 #define LOG_ERROR 2
 
-int currentLogLevel = LOG_INFO;
+int currentLogLevel = LOG_DEBUG;
 
 void log_print(int level, const char* format, ...) {
     if (level >= currentLogLevel) {
