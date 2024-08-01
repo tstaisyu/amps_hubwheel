@@ -110,12 +110,11 @@ int main() {
     }
 
     initMotor(uart1_fd, RIGHT_MOTOR_ID);
-    initMotor(uart2_fd, LEFT_MOTOR_ID);
     if (checkMotorResponse(uart1_fd)) {
         printf("Motor initialized successfully.\n");
 
         // モータに速度コマンドを送信
-        sendSpeedCommand(uart1_fd, RIGHT_MOTOR_ID, 0x00000000);  // 速度値は例です
+        sendSpeedCommand(uart1_fd, RIGHT_MOTOR_ID, 0x00000100);  // 速度値は例です
         if (checkMotorResponse(uart1_fd)) {
             printf("Speed command accepted.\n");
         } else {
@@ -125,11 +124,12 @@ int main() {
         printf("Failed to initialize motor.\n");
     }
 
+    initMotor(uart2_fd, LEFT_MOTOR_ID);
     if (checkMotorResponse(uart2_fd)) {
         printf("Motor initialized successfully.\n");
 
         // モータに速度コマンドを送信
-        sendSpeedCommand(uart2_fd, LEFT_MOTOR_ID, 0x00000000);  // 速度値は例です
+        sendSpeedCommand(uart2_fd, LEFT_MOTOR_ID, 0x00000100);  // 速度値は例です
         if (checkMotorResponse(uart2_fd)) {
             printf("Speed command accepted.\n");
         } else {
