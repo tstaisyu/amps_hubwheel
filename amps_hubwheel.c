@@ -105,12 +105,11 @@ int main() {
     if (fd < 0) return -1;
 
     initMotor(fd, MOTOR_ID);
-    sleep(1);  // 1秒待機
     if (checkMotorResponse(fd)) {
         printf("Motor initialized successfully.\n");
 
         // モータに速度コマンドを送信
-        sendSpeedCommand(fd, MOTOR_ID, 0x00010000);  // 速度値は例です
+        sendSpeedCommand(fd, MOTOR_ID, 0x00000000);  // 速度値は例です
         if (checkMotorResponse(fd)) {
             printf("Speed command accepted.\n");
         } else {
