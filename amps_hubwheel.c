@@ -118,7 +118,7 @@ int main() {
     int fd = uart_open("/dev/ttyTHS0"); // Adjust as per your UART port
     if (fd < 0) return -1;
 
-    const unsigned char command[] = {0x01, 0x52, 0x70, 0x19, 0x00, 0x00, 0x00, 0x00, 0x04}; // Example command
+    const unsigned char command[] = {0x01, 0x51, 0x70, 0x17, 0x00, 0x00, 0x00, 0x00, 0x03}; // Example command
     if (uart_write(fd, command, sizeof(command)) < 0) {
         uart_close(fd);
         return -1;
