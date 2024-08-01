@@ -46,6 +46,22 @@ uint8_t lowByte(uint16_t value) {
 #define DISABLE_EMERGENCY_STOP 0x00000000
 #define ENABLE_MOTOR 0x0000000F
 
+#define LOG_DEBUG 0
+#define LOG_INFO 1
+#define LOG_ERROR 2
+
+int currentLogLevel = LOG_INFO;
+
+void log_print(int level, const char* format, ...) {
+    if (level >= currentLogLevel) {
+        va_list args;
+        va_start(args, format);
+        vprintf(format, args);
+        va_end(args);
+        printf("\n");  // すべてのログメッセージの後に改行を追加
+    }
+}
+
 int uart_open(const char *portname);
 void uart_close(int fd);
 int uart_write(int fd, const unsigned char *data, int len);
@@ -102,21 +118,25 @@ void sendSpeedCommand(int fd, byte motorID, uint32_t speed) {
 
 int main() {
     int fd = uart_open("/dev/ttyTHS0"); // Adjust as per your UART port
-    if (fd < 0) return -1;
+    if (fd < 0) {
+        log_print(LOG_ERROR, "Failed to open UART.");
+        return -1;
+    }
+    log_print(LOG_INFO, "UART opened successfully.");
 
     initMotor(fd, MOTOR_ID);
     if (checkMotorResponse(fd)) {
-        printf("Motor initialized successfully.\n");
+        log_print(LOG_INFO, "Motor initialized successfully.");
 
         // モータに速度コマンドを送信
         sendSpeedCommand(fd, MOTOR_ID, 100000);  // 速度値は例です
         if (checkMotorResponse(fd)) {
-            printf("Speed command accepted.\n");
+            log_print(LOG_INFO, "Speed command accepted.");
         } else {
-            printf("Failed to send speed command.\n");
+            log_print(LOG_ERROR, "Failed to send speed command.");
         }
     } else {
-        printf("Failed to initialize motor.\n");
+        log_print(LOG_ERROR, "Failed to initialize motor.");
     }
 
     uart_close(fd);
@@ -175,57 +195,21 @@ void uart_close(int fd) {
 }
 
 int uart_write(int fd, const unsigned char *data, int len) {
-    printf("Sending command...\n");
-    // データ内容をログに出力
-    printf("Data being sent: ");
-    for (int i = 0; i < len; i++) {
-        printf("%02x ", data[i]);
-    }
-    printf("\n");
-
     int wlen = write(fd, data, len);
     if (wlen != len) {
-        printf("Error from write: %d, %d\n", wlen, errno);
+        log_print(LOG_ERROR, "UART write error: expected %d bytes, sent %d bytes", len, wlen);
         return -1;
     }
-    printf("Command sent.\n");    
     return 0;
 }
 
 int uart_read(int fd, unsigned char *buffer, int len) {
-    printf("Reading response...\n");
-    int rdlen = 0;
-    int totalWaitTime = 0;
-
-    while (totalWaitTime < 5000) {
-        rdlen = read(fd, buffer, len);
-        if (rdlen > 0) {
-            // Output the received data
-            printf("Read %d bytes\n", rdlen);
-            for (int i = 0; i < rdlen; i++) {
-                printf(" %02x", buffer[i]);
-            }
-            printf("\n");
-            return rdlen;
-        } else if (rdlen < 0) {
-            if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                // ノンブロッキングモードの場合、データがまだない
-                printf("Waiting for data...\n");
-                usleep(100000);  // 0.1秒待機
-                totalWaitTime += 100;
-            } else {
-                // シリアスなエラーが発生した
-                printf("Error from read: %d\n", errno);
-                return -1;  // エラーを返して終了
-            }
-        } else {
-            printf("No data received, waiting...\n");
-            usleep(100000);  // 0.1秒待機
-            totalWaitTime += 100;
-        }
+    int rdlen = read(fd, buffer, len);
+    if (rdlen <= 0) {
+        log_print(LOG_ERROR, "UART read error or no data received.");
+        return -1;
     }
-    printf("Read timeout occurred.\n");
-    return 0;
+    return rdlen;
 }
 
 
