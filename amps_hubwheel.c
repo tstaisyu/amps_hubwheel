@@ -41,6 +41,7 @@ uint8_t lowByte(uint16_t value) {
 #define CONTROL_WORD_ADDRESS 0x7019
 #define WRITE_COMMAND 0x51
 #define ENABLE_COMMAND 0x52
+#define VEL_SEND_COMMAND 0x54
 #define OPERATION_MODE_SPEED_CONTROL 0x00000003
 #define DISABLE_EMERGENCY_STOP 0x00000000
 #define ENABLE_MOTOR 0x0000000F
@@ -96,7 +97,7 @@ int checkMotorResponse(int fd) {
 void sendSpeedCommand(int fd, byte motorID, uint32_t speed) {
     // 速度コマンドを構築 (アドレスとコマンドは適宜調整)
     uint16_t speedCommandAddress = 0x70B2;  // 仮のアドレス
-    sendCommand(fd, motorID, speedCommandAddress, WRITE_COMMAND, speed);
+    sendCommand(fd, motorID, speedCommandAddress, VEL_SEND_COMMAND, speed);
 }
 
 int main() {
