@@ -59,11 +59,33 @@ int checkMotorResponse(int fd) {
         printf("Response received: ");
         for (int i = 0; i < len; i++) {
             printf("%02x ", buffer[i]);
+            if ((i + 1) % 10 == 0) { // 10バイトごとに改行
+                printf("\n");
+            }
         }
-        printf("\n");
+        if (len % 10 != 0) { // データの最後が10バイトの倍数でない場合は改行を追加
+            printf("\n");
+        }
 
-        // ここでバッファの内容に基づいて成功かどうかを判断
-        // 例: if (buffer[0] == EXPECTED_RESPONSE) return 1;
+        // モーターからの応答に応じた処理
+        switch(buffer[1]) { // 2番目のバイトに応答コードがあると仮定
+            case 0x61:
+            case 0x62:
+            case 0x64:
+                printf("Command executed successfully.\n");
+                return 1;
+            case 0x50:
+                printf("Error: Data length is wrong.\n");
+                break;
+            case 0x58:
+                printf("Error: Object address is not writable.\n");
+                break;
+            case 0x5F:
+                printf("Error: Object address does not exist.\n");
+                break;
+            default:
+                printf("Received unknown response code.\n");
+        }
     } else {
         printf("No response or error reading response.\n");
     }
