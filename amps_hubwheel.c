@@ -35,18 +35,26 @@ uint8_t lowByte(uint16_t value) {
     return (uint8_t)(value & 0xFF);
 }
 
+// モーターのID
 #define RIGHT_MOTOR_ID 0x02
 #define LEFT_MOTOR_ID 0x01
+
+// オペレーションアドレス
 #define OPERATION_MODE_ADDRESS 0x7017
 #define EMERGENCY_STOP_ADDRESS 0x701F
 #define CONTROL_WORD_ADDRESS 0x7019
+
+// コマンドサイズ指定
 #define WRITE_COMMAND 0x51
 #define ENABLE_COMMAND 0x52
 #define VEL_SEND_COMMAND 0x54
+
+// コマンドデータ
 #define OPERATION_MODE_SPEED_CONTROL 0x00000003
 #define DISABLE_EMERGENCY_STOP 0x00000000
 #define ENABLE_MOTOR 0x0000000F
 
+// 関数プロトタイプ
 int uart_open(const char *portname);
 void uart_close(int fd);
 int uart_write(int fd, const unsigned char *data, int len);
@@ -54,6 +62,7 @@ int uart_read(int fd, unsigned char *buffer, int len);
 void sendCommand(int fd, byte motorID, uint16_t address, byte command, uint32_t data);
 void initMotor(int fd, byte motorID);
 
+// モーターからの応答を確認する関数
 int checkMotorResponse(int fd) {
     unsigned char buffer[100];
     int len = uart_read(fd, buffer, sizeof(buffer));
@@ -95,6 +104,7 @@ int checkMotorResponse(int fd) {
     return 0;
 }
 
+// 速度コマンドを送信する関数
 void sendSpeedCommand(int fd, byte motorID, uint32_t speed) {
     // 速度コマンドを構築 (アドレスとコマンドは適宜調整)
     uint16_t speedCommandAddress = 0x70B2;  // 仮のアドレス
@@ -144,7 +154,7 @@ int main() {
     return 0;
 }
 
-
+// UART通信の初期化
 int uart_open(const char *portname) {
     int fd;
     struct termios tty;
@@ -191,10 +201,12 @@ int uart_open(const char *portname) {
     return fd;
 }
 
+// UART通信の終了処理
 void uart_close(int fd) {
     close(fd);
 }
 
+// UART通信でデータを送信する関数
 int uart_write(int fd, const unsigned char *data, int len) {
     printf("Sending command...\n");
     // データ内容をログに出力
@@ -213,6 +225,7 @@ int uart_write(int fd, const unsigned char *data, int len) {
     return 0;
 }
 
+// UART通信でデータを受信する関数
 int uart_read(int fd, unsigned char *buffer, int len) {
     printf("Reading response...\n");
     int rdlen = 0;
@@ -249,7 +262,7 @@ int uart_read(int fd, unsigned char *buffer, int len) {
     return 0;
 }
 
-
+// モーターにコマンドを送信する関数
 void sendCommand(int fd, byte motorID, uint16_t address, byte command, uint32_t data) {
     byte packet[] = {motorID, command, highByte(address), lowByte(address), 0, (byte)(data >> 24), (byte)(data >> 16), (byte)(data >> 8), (byte)data};
     byte checksum = 0;
@@ -260,6 +273,7 @@ void sendCommand(int fd, byte motorID, uint16_t address, byte command, uint32_t 
     uart_write(fd, &checksum, 1);
 }
 
+// モーターの初期化
 void initMotor(int fd, byte motorID) {
     sendCommand(fd, motorID, OPERATION_MODE_ADDRESS, WRITE_COMMAND, OPERATION_MODE_SPEED_CONTROL);
     usleep(100000);  // 100 ms delay
