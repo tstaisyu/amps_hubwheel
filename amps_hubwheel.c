@@ -111,6 +111,23 @@ void sendSpeedCommand(int fd, byte motorID, uint32_t speed) {
     sendCommand(fd, motorID, speedCommandAddress, VEL_SEND_COMMAND, speed);
 }
 
+// モーター初期化関数
+void initializeMotors(int uart1_fd, int uart2_fd) {
+    initMotor(uart1_fd, RIGHT_MOTOR_ID);
+    if (checkMotorResponse(uart1_fd)) {
+        printf("Right motor initialized successfully.\n");
+    } else {
+        printf("Failed to initialize right motor.\n");
+    }
+
+    initMotor(uart2_fd, LEFT_MOTOR_ID);
+    if (checkMotorResponse(uart2_fd)) {
+        printf("Left motor initialized successfully.\n");
+    } else {
+        printf("Failed to initialize left motor.\n");
+    }
+}
+
 int main() {
     int uart1_fd = uart_open("/dev/ttyTHS0"); // Adjust as per your UART port
     int uart2_fd = uart_open("/dev/ttyTHS2");
@@ -118,7 +135,7 @@ int main() {
         fprintf(stderr, "Failed to open UART ports\n");
         return EXIT_FAILURE;
     }
-
+/*
     initMotor(uart2_fd, LEFT_MOTOR_ID);
     if (checkMotorResponse(uart2_fd)) {
         printf("Motor initialized successfully.\n");
@@ -148,6 +165,9 @@ int main() {
     } else {
         printf("Failed to initialize motor.\n");
     }
+*/
+    initializeMotors(uart1_fd, uart2_fd);
+    handleMotorCommands(uart1_fd, uart2_fd);
 
     uart_close(uart1_fd);
     uart_close(uart2_fd);
