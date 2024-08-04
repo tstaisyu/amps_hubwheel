@@ -13,3 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#ifndef MOTOR_COMMANDS_H
+#define MOTOR_COMMANDS_H
+
+#include <stdint.h>
+
+typedef uint8_t byte;
+
+// モーターのID
+#define RIGHT_MOTOR_ID 0x02
+#define LEFT_MOTOR_ID 0x01
+
+// オペレーションアドレス
+#define OPERATION_MODE_ADDRESS 0x7017
+#define EMERGENCY_STOP_ADDRESS 0x701F
+#define CONTROL_WORD_ADDRESS 0x7019
+
+// コマンドサイズ指定
+#define WRITE_COMMAND 0x51
+#define ENABLE_COMMAND 0x52
+#define VEL_SEND_COMMAND 0x54
+
+// コマンドデータ
+#define OPERATION_MODE_SPEED_CONTROL 0x00000003
+#define DISABLE_EMERGENCY_STOP 0x00000000
+#define ENABLE_MOTOR 0x0000000F
+
+#endif // MOTOR_COMMANDS_H

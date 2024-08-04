@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "amps_hubwheel.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -21,9 +22,6 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <termios.h>
-#include <stdint.h>
-
-typedef uint8_t byte;
 
 // 上位バイトを取得する関数
 uint8_t highByte(uint16_t value) {
@@ -34,25 +32,6 @@ uint8_t highByte(uint16_t value) {
 uint8_t lowByte(uint16_t value) {
     return (uint8_t)(value & 0xFF);
 }
-
-// モーターのID
-#define RIGHT_MOTOR_ID 0x02
-#define LEFT_MOTOR_ID 0x01
-
-// オペレーションアドレス
-#define OPERATION_MODE_ADDRESS 0x7017
-#define EMERGENCY_STOP_ADDRESS 0x701F
-#define CONTROL_WORD_ADDRESS 0x7019
-
-// コマンドサイズ指定
-#define WRITE_COMMAND 0x51
-#define ENABLE_COMMAND 0x52
-#define VEL_SEND_COMMAND 0x54
-
-// コマンドデータ
-#define OPERATION_MODE_SPEED_CONTROL 0x00000003
-#define DISABLE_EMERGENCY_STOP 0x00000000
-#define ENABLE_MOTOR 0x0000000F
 
 // 関数プロトタイプ
 int uart_open(const char *portname);
