@@ -22,8 +22,8 @@
 typedef uint8_t byte;
 
 // モーターのID
-#define RIGHT_MOTOR_ID 0x01
-#define LEFT_MOTOR_ID 0x02
+#define RIGHT_MOTOR_ID 0x02
+#define LEFT_MOTOR_ID 0x01
 
 // オペレーションアドレス
 #define OPERATION_MODE_ADDRESS 0x7017
