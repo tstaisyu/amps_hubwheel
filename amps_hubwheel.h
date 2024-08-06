@@ -40,4 +40,15 @@ typedef uint8_t byte;
 #define DISABLE_EMERGENCY_STOP 0x00000000
 #define ENABLE_MOTOR 0x0000000F
 
+int uart_open(const char *portname);
+void uart_close(int fd);
+int uart_write(int fd, const unsigned char *data, int len);
+int uart_read(int fd, unsigned char *buffer, int len);
+void sendCommand(int fd, byte motorID, uint16_t address, byte command, uint32_t data);
+void initMotor(int fd, byte motorID);
+int checkMotorResponse(int fd);
+void sendSpeedCommand(int fd, byte motorID, uint32_t speed);
+void initializeMotors(int uart1_fd, int uart2_fd);
+void handleMotorCommands(int uart1_fd, int uart2_fd);
+
 #endif // MOTOR_COMMANDS_H

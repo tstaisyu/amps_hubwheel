@@ -23,6 +23,22 @@
 #include <errno.h>
 #include <termios.h>
 
+int main() {
+    int uart1_fd = uart_open("/dev/ttyTHS0"); // Adjust as per your UART port
+    int uart2_fd = uart_open("/dev/ttyTHS2");
+    if (uart1_fd < 0 || uart2_fd < 0) {
+        fprintf(stderr, "Failed to open UART ports\n");
+        return EXIT_FAILURE;
+    }
+
+    initializeMotors(uart1_fd, uart2_fd);
+    handleMotorCommands(uart1_fd, uart2_fd);
+
+    uart_close(uart1_fd);
+    uart_close(uart2_fd);
+    return 0;
+}
+
 // 上位バイトを取得する関数
 uint8_t highByte(uint16_t value) {
     return (uint8_t)(value >> 8);
@@ -32,14 +48,6 @@ uint8_t highByte(uint16_t value) {
 uint8_t lowByte(uint16_t value) {
     return (uint8_t)(value & 0xFF);
 }
-
-// 関数プロトタイプ
-int uart_open(const char *portname);
-void uart_close(int fd);
-int uart_write(int fd, const unsigned char *data, int len);
-int uart_read(int fd, unsigned char *buffer, int len);
-void sendCommand(int fd, byte motorID, uint16_t address, byte command, uint32_t data);
-void initMotor(int fd, byte motorID);
 
 // モーターからの応答を確認する関数
 int checkMotorResponse(int fd) {
@@ -122,22 +130,6 @@ void handleMotorCommands(int uart1_fd, int uart2_fd) {
     } else {
         printf("Failed to send speed command to left motor.\n");
     }
-}
-
-int main() {
-    int uart1_fd = uart_open("/dev/ttyTHS0"); // Adjust as per your UART port
-    int uart2_fd = uart_open("/dev/ttyTHS2");
-    if (uart1_fd < 0 || uart2_fd < 0) {
-        fprintf(stderr, "Failed to open UART ports\n");
-        return EXIT_FAILURE;
-    }
-
-    initializeMotors(uart1_fd, uart2_fd);
-    handleMotorCommands(uart1_fd, uart2_fd);
-
-    uart_close(uart1_fd);
-    uart_close(uart2_fd);
-    return 0;
 }
 
 // UART通信の初期化
