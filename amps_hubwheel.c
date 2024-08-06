@@ -117,14 +117,14 @@ void initializeMotors(int uart1_fd, int uart2_fd) {
 
 // モーター速度コマンド送信とレスポンスの確認
 void handleMotorCommands(int uart1_fd, int uart2_fd) {
-    sendSpeedCommand(uart1_fd, RIGHT_MOTOR_ID, 0x00000100);  // 速度値は例です
+    sendSpeedCommand(uart1_fd, RIGHT_MOTOR_ID, 0x00010000);  // 速度値は例です
     if (checkMotorResponse(uart1_fd)) {
         printf("Right motor speed command accepted.\n");
     } else {
         printf("Failed to send speed command to right motor.\n");
     }
 
-    sendSpeedCommand(uart2_fd, LEFT_MOTOR_ID, 0x00000100);  // 速度値は例です
+    sendSpeedCommand(uart2_fd, LEFT_MOTOR_ID, 0x00010000);  // 速度値は例です
     if (checkMotorResponse(uart2_fd)) {
         printf("Left motor speed command accepted.\n");
     } else {
